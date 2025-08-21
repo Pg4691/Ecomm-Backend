@@ -28,8 +28,9 @@ public class ProductController {
 
     // Create product
     @PostMapping("/product")
-    public Product createProduct(@RequestBody Product product) {
-        return productService.saveProduct(product);
+    public String createProduct(@RequestBody Product product) {
+         productService.saveProduct(product);
+         return "Product created sucessfully";
     }
 
     // Update product
@@ -45,7 +46,8 @@ public class ProductController {
             product.setCategory(productDetails.getCategory());
             product.setUpdatedDate(productDetails.getUpdatedDate());
 
-            return productService.saveProduct(product);
+             productService.saveProduct(product);
+            return "Product updated succesfully";
         }
         return "Product not found";
     }
