@@ -5,37 +5,62 @@ import com.ecomm.firstproject.repository.ProductRepository;
 import com.ecomm.firstproject.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class ProductController {
-
-    private final ProductService productService;
+    @Autowired
+    private  ProductService productService;
 
     // Get all products
     @GetMapping("/products")
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
+    public ResponseEntity<List<Product>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts()) ;
     }
 
-    @GetMapping("/product/{id}")
-    public Product getProduct(@PathVariable String id){
-        return productService.getProductById(id);
+    @GetMapping("/product/id/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable String id){
+        return ResponseEntity.ok(productService.getProductById(id));
+    }
+    @GetMapping("/product/name/{productName}")
+    public ResponseEntity<Product> getProductByName(@PathVariable String productName) {
+        Product product = productService.getProductByName(productName);
+
+        if (product != null) {
+            // ✅ Always recalc from SKUs/Variants
+            BigDecimal effectiveMrp = product.getEffectiveMrp();
+            BigDecimal effectiveSelling = product.getEffectiveSellingPrice();
+
+            product.setMrp(effectiveMrp);
+            product.setSellingPrice(effectiveSelling);
+
+            return ResponseEntity.ok(product);
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    // Create product
+
+        // Create product
+
     @PostMapping("/product")
-    public String createProduct(@RequestBody Product product) {
+    public ResponseEntity<String> createProduct(@RequestBody Product product) {
          productService.saveProduct(product);
-         return "Product created sucessfully";
+         return ResponseEntity.ok("Product created sucessfully");
     }
 
     // Update product
+
     @PutMapping("/product/{id}")
-    public Object updateProduct(@PathVariable String id, @RequestBody Product productDetails) {
+    public ResponseEntity<Object> updateProduct(@PathVariable String id, @RequestBody Product productDetails) {
         Product product = productService.getProductById(id);
 
         if (product != null) {
@@ -45,23 +70,26 @@ public class ProductController {
             product.setSellingPrice(productDetails.getSellingPrice());
             product.setCategory(productDetails.getCategory());
             product.setUpdatedDate(productDetails.getUpdatedDate());
+            product.setSkus(productDetails.getSkus());
 
-             productService.saveProduct(product);
-            return "Product updated succesfully";
+            productService.saveProduct(product);
+            return ResponseEntity.ok( "Product updated succesfully");
         }
-        return "Product not found";
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Product not found");
     }
 
     // Delete product
+
     @DeleteMapping("/product/{id}")
-    public String deleteProduct(@PathVariable String id) {
+    public ResponseEntity<String> deleteProduct(@PathVariable String id) {
         Product product = productService.getProductById(id);
 
         if (product != null) {
             productService.deleteProduct(product);
-            return "Product deleted successfully!";
+            return ResponseEntity.ok("Product deleted successfully");
         }
-        return "Product not found!";
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
     }
 
 }
