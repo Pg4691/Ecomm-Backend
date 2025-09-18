@@ -27,8 +27,10 @@ public class Product {
     private String category;
     private Date creationDate;
     private Date updatedDate;
+    private Integer stockQuantity;
 
     private List<Sku> skus;
+    private String skuId;
 
     // ------------ Inner Classes ------------
 
@@ -36,7 +38,7 @@ public class Product {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Sku {
-        private String skuCode;
+
         private String skuName;
         private BigDecimal mrp;
         private BigDecimal sellingPrice;
@@ -52,40 +54,5 @@ public class Product {
         private BigDecimal mrp;
         private BigDecimal sellingPrice;
         private Integer stockQuantity;
-    }
-
-    // ------------ Utility Methods ------------
-    public BigDecimal getEffectiveSellingPrice() {
-        if (skus != null && !skus.isEmpty()) {
-            // If product has SKUs
-            return skus.stream()
-                    .flatMap(sku -> {
-                        if (sku.getVariants() != null && !sku.getVariants().isEmpty()) {
-                            return sku.getVariants().stream().map(Variant::getSellingPrice);
-                        } else {
-                            return java.util.stream.Stream.of(sku.getSellingPrice());
-                        }
-                    })
-                    .min(BigDecimal::compareTo)
-                    .orElse(sellingPrice); // fallback
-        }
-        return sellingPrice; // no SKUs, use product price
-    }
-
-    public BigDecimal getEffectiveMrp() {
-        if (skus != null && !skus.isEmpty()) {
-            // If product has SKUs
-            return skus.stream()
-                    .flatMap(sku -> {
-                        if (sku.getVariants() != null && !sku.getVariants().isEmpty()) {
-                            return sku.getVariants().stream().map(Variant::getMrp);
-                        } else {
-                            return java.util.stream.Stream.of(sku.getMrp());
-                        }
-                    })
-                    .min(BigDecimal::compareTo)
-                    .orElse(mrp); // fallback
-        }
-        return mrp; // no SKUs, use product price
     }
 }

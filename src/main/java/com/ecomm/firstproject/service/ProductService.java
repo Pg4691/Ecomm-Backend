@@ -16,16 +16,30 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-
+    // Get all products
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
+    // Get product by ID
     public Product getProductById(String id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id " + id));
     }
 
+    // Get product by name
+    public Product getProductByName(String productName) {
+        return Optional.ofNullable(productRepository.findByProductName(productName))
+                .orElseThrow(() -> new RuntimeException("Product not found with name " + productName));
+    }
+
+    // Get product by product-level SKU ID
+    public Product getProductBySkuId(String skuId) {
+        return Optional.ofNullable(productRepository.findByskuId(skuId))
+                .orElseThrow(() -> new RuntimeException("Product not found with skuId " + skuId));
+    }
+
+    // Save product
     public Product saveProduct(Product product) {
         if (product.getSkus() != null && !product.getSkus().isEmpty()) {
             for (Product.Sku sku : product.getSkus()) {
@@ -54,15 +68,9 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-
+    // Delete product
     public String deleteProduct(Product product) {
         productRepository.delete(product);
-        return "Product deleted ";
+        return "Product deleted successfully";
     }
-
-    public Product getProductByName(String productName) {
-        return Optional.ofNullable(productRepository.findByProductName(productName))
-                .orElseThrow(() -> new RuntimeException("Product not found with name " + productName));
-    }
-
 }

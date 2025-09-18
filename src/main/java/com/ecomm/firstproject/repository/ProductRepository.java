@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends MongoRepository<Product, String> {
     Product findByProductName(String productName);
+    Product findByskuId(String skuId);
 
 
 }
