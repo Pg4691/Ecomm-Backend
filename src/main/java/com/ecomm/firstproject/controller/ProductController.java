@@ -64,7 +64,8 @@ public class ProductController {
     }
 
     @PutMapping("/product/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable String id, @RequestBody Product productDetails) {
+    public ResponseEntity<Product> updateProduct(@PathVariable String id,
+                                                 @RequestBody Product productDetails) {
         try {
             Product product = productService.getProductById(id);
 
@@ -76,14 +77,13 @@ public class ProductController {
             product.setUpdatedDate(new Date()); // auto-update date
             product.setSkus(productDetails.getSkus());
             product.setSkuId(productDetails.getSkuId());
-            // Product-level SKU
 
             Product updatedProduct = productService.saveProduct(product);
 
-            return ResponseEntity.ok(updatedProduct); // return full product
+            return ResponseEntity.ok(updatedProduct); // return the updated product
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Product not found with id " + id);
+                    .body(null); // or throw custom exception
         }
     }
 
